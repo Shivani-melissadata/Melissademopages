@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            width: 48%; /* Adjust width as needed to fit side by side */
+            justify-content: space-between;
+            gap: 20px; /* Adjust the gap as needed */
+            padding: 20px;
+            background-color: lavender;
+            margin: 0 auto; /* Center the form */
+        }
+
+        .box {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            width: 45%;
+            margin-right: 15px;
+        }
+
+        .form-group.full-width {
+            width: 100%;
+        }
+
+        label {
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+
+        select, input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .parent-response-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px; /* Adjust the gap as needed */
+        }
+
+        .response-container, .response-container1 {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        .info-message {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .info-message a {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+<h1 style="text-align: center;">Global Phone Demo</h1>
+<div class="container">
+    <div class="box">
+        <h2>Phone data</h2>
+        <form id="PhoneForm" class="form-container">
+            <div class="form-group full-width">
+                <label for="license">License***</label>
+                <input type="password" id="license" name="license">
+            </div>
+            <div class="form-group full-width">
+                <label for="phone">Phone</label>
+                <input type="text" id="phone" name="phone">
+            </div>
+            <div class="form-group">
+                <label for="country">Country</label>
+                <input type="text" id="country" name="country">
+            </div>
+            <div class="form-group">
+                <label for="VerifyPhone">VerifyPhone</label>
+                <select id="VerifyPhone" name="VerifyPhone">
+                    <option value=""></option>
+                    <option value="Premium">Premium</option>
+                    <option value="Express">Express</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="CallerID">CallerID</label>
+                <select id="CallerID" name="CallerID">
+                    <option value=""></option>
+                    <option value="True">True</option>
+                    <option value="False">False</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sampleDropdown">Sample Data</label>
+                <select id="sampleDropdown" onchange="fillSampleData()">
+                    <option value="none"></option>
+                    <option value="ValidPhone(lline)">ValidPhone(landline)</option>
+                    <option value="ValidPhone(cell)">ValidPhone(cellular)</option>
+                    <option value="Disconnected">disconnected</option>
+                </select>
+            </div>
+
+            <div class="form-group full-width">
+                <button type="button" onclick="submitForm()">Submit</button>
+                <button type="button" onclick="clearForm()">Clear</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="parent-response-container">
+    <div class="response-container" id="responseContainer" style="display: none;">
+        <h2>Response:</h2>
+        <pre id="response"></pre>
+    </div>
+    <div class="response-container1" id="responseContainer1" style="display: none;">
+        <h2>Results Description:</h2>
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Short Description</th>
+                    <th>Long Description</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
+        <div class="info-message">
+            <p>Please refer to the <a href="https://wiki.melissadata.com/index.php?title=Result_Code_Details#Global_Phone" target="_blank">wiki link</a> for more result codes.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Sample data in JSON format
+    var sampleData = {
+        "ValidPhone(lline)": {
+            "phone": "2128497623",
+            "country": ""
+        },
+        "ValidPhone(cell)": {
+            "phone": "2174197655",
+            "country": ""
+        },
+        "Disconnected": {
+            "phone": "9497689153",
+            "country": ""
+        }
+    };
+
+    // Mapping of codes to descriptions
+    var resultsDescriptions = {
+        "PS01": {
+            "short": "Valid Phone",
+            "long": "The phone number is valid."
+        },
+        "PS07": {
+            "short": "Cellular Line",
+            "long": "(US/CA Only) On activation, the exchange type of the phone number was designated as a cellular number, but current status cannot be confirmed."
+        },
+        "PS08": {
+            "short": "Land Line",
+            "long": "(US/CA Only) On activation, the exchange type of the phone number was designated as a land line, but current status cannot be confirmed."
+        },
+        "PS18": {
+            "short": "Do Not Call",
+            "long": "The owner of this phone number has opted out of Melissa's call lists. This has no relation to the US National Do Not Call list."
+        },
+        "PS20": {
+            "short": "Low Confidence",
+            "long": "Number exists within a block of registered phone numbers."
+        },
+        "PS22": {
+            "short": "High Confidence",
+            "long": "Number was verified against current dialing equipment."
+        },
+        "PS30": {
+            "short": "Premium Timeout",
+            "long": "Querying Premium has timed out, but has continued to run in the background. Query later to obtain the cached results."
+        },
+        "PS31": {
+            "short": "CallerID Timeout",
+            "long": "Querying CallerID has timed out, but has continued to run in the background. Query later to obtain the cached results."
+        },
+        "PE01": {
+            "short": "Invalid Phone",
+            "long": "The area code/phone number does not exist in our database or contains non-numbers."
+        },
+        "PE02": {
+            "short": "Blank Phone",
+            "long": "The phone number is blank."
+        },
+        "PE03": {
+            "short": "Bad Phone",
+            "long": "The phone number has too many or too few digits."
+        },
+        "PE04": {
+            "short": "Multiple Match",
+            "long": "Two or more possible area codes are available as a fix and their distance is too close to choose one over the other."
+        },
+        "PE05": {
+            "short": "Bad Prefix/Prefix +1",
+            "long": "The phone prefix or first 7-digits do not exist in our database."
+        },
+        "PE11": {
+            "short": "Disconnected",
+            "long": "Phone number is no longer in service."
+        }
+    };
+
+    function fillSampleData() {
+        var sampleDropdown = document.getElementById('sampleDropdown');
+        var selectedOption = sampleDropdown.value;
+
+        if (selectedOption !== 'none') {
+            var data = sampleData[selectedOption];
+            if (data) {
+                document.getElementById('phone').value = data.phone || '';
+                document.getElementById('country').value = data.country || '';
+            }
+        } else {
+            clearForm();
+        }
+    }
+
+    function submitForm() {
+        var form = document.getElementById('PhoneForm');
+        var formData = new FormData(form);
+
+        var url = 'https://globalphone.melissadata.net/V4/WEB/GlobalPhone/doGlobalPhone';
+        var queryParams = new URLSearchParams();
+
+        // Map form data to corresponding URL parameters
+        queryParams.append('id', formData.get('license'));
+        queryParams.append('opt', `VerifyPhone:${formData.get('VerifyPhone')},CallerID:${formData.get('CallerID')}`);
+        queryParams.append('phone', formData.get('phone'));
+        queryParams.append('country', formData.get('country'));
+
+        // Construct final URL with parameters
+        var finalUrl = url + '?' + queryParams.toString();
+
+        // Make a fetch request
+        fetch(finalUrl)
+            .then(response => response.json())
+            .then(data => {
+                displayResponse(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function displayResponse(data) {
+        var responseElement = document.getElementById('response');
+        responseElement.textContent = JSON.stringify(data, null, 2);
+        var responseContainer = document.getElementById('responseContainer');
+        responseContainer.style.display = 'block'; // Show response container
+
+        // Access the "Results" column
+        if (data && data.Records && data.Records.length > 0) {
+            var results = data.Records[0].Results; // Accessing the "Results" field from the first record
+            console.log("Results:", results);
+
+            // Clear previous results
+            var resultsBody = document.getElementById('resultsBody');
+            resultsBody.innerHTML = '';
+
+            // Split the results into individual codes
+            var resultCodes = results.split(',');
+
+            // Populate the table with results descriptions
+            resultCodes.forEach(code => {
+                var shortDescription = resultsDescriptions[code].short;
+                var longDescription = resultsDescriptions[code].long;
+
+                var row = `<tr>
+                               <td>${code}</td>
+                               <td>${shortDescription}</td>
+                               <td>${longDescription}</td>
+                           </tr>`;
+                resultsBody.insertAdjacentHTML('beforeend', row);
+            });
+
+            // Show the results container
+            var responseContainer1 = document.getElementById('responseContainer1');
+            responseContainer1.style.display = 'block';
+        }
+    }
+
+    function clearForm() {
+        document.getElementById('phone').value = '';
+        document.getElementById('country').value = '';
+        document.getElementById('VerifyPhone').value = '';
+        document.getElementById('CallerID').value = '';
+
+    }
+</script>
+</body>
+</html>
